@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Playground | Clambon</title>
+    <link rel="icon" type="image/png" href="./assets/clambon-icon.png">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-shell" id="appShell">
+      <header class="topbar">
+        <a class="brand" id="homeLink" href="./index.html" aria-label="トップへ戻る">
+          <img class="brand-mark" src="./assets/clambon-icon.png" alt="Clambon Playgroundのアイコン">
+          <div>
+            <p class="brand-kicker">Clambon</p>
+            <h1>Playground</h1>
+          </div>
+        </a>
+
+        <label class="project-name">
+          <span>プロジェクト</span>
+          <input id="projectName" value="Clambonのプロジェクト" aria-label="プロジェクト名">
+        </label>
+
+        <div class="extension-topbar-mount" id="extensionTopbarMount"></div>
+
+        <div class="top-actions" aria-label="プロジェクト操作">
+          <button class="icon-button" id="settingsButton" type="button" title="Playgroundの設定" aria-label="Playgroundの設定" aria-haspopup="dialog" aria-controls="settingsModal" aria-expanded="false">⚙</button>
+          <button class="icon-button" id="extensionButton" type="button" title="拡張機能を追加">＋</button>
+          <button class="learning-toggle" id="learningModeButton" type="button" aria-pressed="false" title="学習モードを切り替える">
+            <span aria-hidden="true">📖</span> 学習
+          </button>
+          <div class="file-menu" id="fileMenu">
+            <button class="file-menu-toggle" id="fileMenuButton" type="button" aria-expanded="false" aria-controls="fileMenuPanel">
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M4 6h6l2 2h8v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+                <path d="M4 6a2 2 0 0 1 2-2h4l2 2"></path>
+              </svg>
+              <span>ファイル</span>
+            </button>
+            <div class="file-menu-panel" id="fileMenuPanel">
+              <button id="saveToPcButton" type="button">PCに保存する</button>
+              <button id="loadFromPcButton" type="button">PCから読み込む</button>
+            </div>
+            <input id="fileInput" type="file" accept=".clam,application/x-clambon-project" hidden>
+          </div>
+          <button class="icon-button primary" id="runButton" type="button" title="実行">▶</button>
+          <button class="icon-button" id="stopButton" type="button" title="停止">■</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="split-workbench" id="splitWorkbench" aria-label="コードと出力">
+          <div class="pane-slot" data-slot="left">
+            <section class="editor-panel movable-pane" data-pane="code" aria-label="コードエディタ">
+              <div class="panel-header pane-drag-handle" title="ドラッグで移動">
+                <div>
+                  <p class="eyebrow">Code</p>
+                  <h2>コード</h2>
+                </div>
+                <div class="editor-tools">
+                  <button type="button" id="formatButton">整える</button>
+                </div>
+              </div>
+              <div class="code-wrap" id="codeWrap">
+                <pre class="line-numbers" aria-hidden="true" id="lineNumbers">1</pre>
+                <div class="code-editor-stack">
+                  <pre class="syntax-highlight" aria-hidden="true" id="syntaxHighlight"></pre>
+                  <textarea id="codeEditor" spellcheck="false" aria-label="Clambonのコード"></textarea>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="pane-slot" data-slot="right-top">
+            <section class="output-panel movable-pane" data-pane="output" id="outputPanel" aria-label="出力">
+              <div class="output-header pane-drag-handle" title="ドラッグで移動">
+                <div>
+                  <p class="eyebrow">Output</p>
+                  <h2>出力</h2>
+                </div>
+                <span class="run-status idle" id="runStatus">待機中</span>
+              </div>
+              <pre id="outputLog">実行結果がここに表示されます。</pre>
+            </section>
+          </div>
+
+          <div class="pane-slot tutorial-pane-slot" data-slot="right-bottom">
+            <section class="tutorial-panel movable-pane" data-pane="tutorial" id="tutorialPanel" aria-label="Clambon学習パレット">
+              <div class="tutorial-header pane-drag-handle" title="ドラッグで移動">
+                <div>
+                  <p class="eyebrow">Learn</p>
+                  <h2>学習パレット</h2>
+                </div>
+                <span class="tutorial-progress" id="tutorialProgress">0%</span>
+              </div>
+              <div class="tutorial-tabs" role="tablist" aria-label="学習パレットの表示">
+                <button class="tutorial-tab active" id="lessonTab" role="tab" aria-selected="true" aria-controls="lessonView" type="button">レッスン</button>
+                <button class="tutorial-tab" id="referenceTab" role="tab" aria-selected="false" aria-controls="referenceView" type="button">ブロック対応表</button>
+              </div>
+              <div class="tutorial-body">
+                <section id="lessonView" role="tabpanel" aria-labelledby="lessonTab"></section>
+                <section id="referenceView" role="tabpanel" aria-labelledby="referenceTab" hidden></section>
+              </div>
+            </section>
+          </div>
+        </section>
+        <section class="extension-mode-screen" id="extensionModeMount" hidden></section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="settingsModal" hidden>
+      <section class="extension-modal settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow" data-i18n="settings.kicker">Preferences</p>
+            <h2 id="settingsModalTitle" data-i18n="settings.title">Playgroundの設定</h2>
+          </div>
+          <button class="icon-button" id="settingsCloseButton" type="button" title="閉じる" aria-label="閉じる">×</button>
+        </div>
+        <div class="settings-form">
+          <label>
+            <span data-i18n="settings.language">表示言語</span>
+            <select id="settingsLanguage">
+              <option value="ja">日本語</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="settings.theme">テーマ</span>
+            <select id="settingsTheme">
+              <option value="system" data-i18n="settings.themeSystem">OSの設定に合わせる</option>
+              <option value="light" data-i18n="settings.themeLight">ライト</option>
+              <option value="dark" data-i18n="settings.themeDark">ダーク</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="settings.fontSize">エディタの文字サイズ</span>
+            <select id="settingsFontSize">
+              <option value="12">12 px</option><option value="14">14 px</option><option value="16">16 px</option><option value="18">18 px</option><option value="20">20 px</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="settings.tabSize">Tab幅</span>
+            <select id="settingsTabSize">
+              <option value="2">2 spaces</option><option value="4">4 spaces</option><option value="8">8 spaces</option>
+            </select>
+          </label>
+        </div>
+        <div class="settings-footer">
+          <p data-i18n="settings.autoSave">変更は自動的に保存されます。</p>
+          <button id="settingsResetButton" type="button" data-i18n="settings.reset">初期値に戻す</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="extensionModal" hidden>
+      <section class="extension-modal" role="dialog" aria-modal="true" aria-labelledby="extensionModalTitle">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Extensions</p>
+            <h2 id="extensionModalTitle">拡張機能を追加</h2>
+          </div>
+          <button class="icon-button" id="extensionCloseButton" type="button" title="閉じる">×</button>
+        </div>
+        <div class="extension-form">
+          <label>
+            <span>GitHub または manifest URL</span>
+            <input id="extensionUrlInput" type="url" placeholder="https://github.com/user/repo/tree/main/Clage">
+          </label>
+          <button id="extensionLoadButton" type="button">読み込む</button>
+        </div>
+        <p class="extension-status" id="extensionStatusText">extension.json を持つ公開拡張機能を読み込めます。</p>
+        <div class="extension-list" id="extensionList"></div>
+      </section>
+    </div>
+
+    <script src="./project-zip.js"></script>
+    <script src="./tutorial-data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

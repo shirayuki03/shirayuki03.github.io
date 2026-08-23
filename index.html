@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clambon | Scratchから始めるテキストプログラミング言語</title>
+    <meta name="description" content="Scratchのブロックと1対1対応するコードを書ける、学習向けプログラミング言語Clambon。">
+    <link rel="icon" type="image/png" href="./assets/clambon-icon.png">
+    <link rel="stylesheet" href="./home.css">
+  </head>
+  <body>
+    <nav class="site-menu" id="siteMenu" aria-label="サイトメニュー">
+      <button class="site-menu-button" id="siteMenuButton" type="button" aria-expanded="false" aria-controls="siteMenuPanel" aria-label="メニューを開く"><span></span><span></span><span></span></button>
+      <div class="site-menu-panel" id="siteMenuPanel" hidden>
+        <a href="#homeTop">トップ</a>
+        <a href="./docs.html">ドキュメント</a>
+      </div>
+    </nav>
+    <div class="site-language-picker site-language-floating" id="siteLanguagePicker">
+      <button class="site-language-button" id="siteLanguageButton" type="button" aria-label="表示言語を選択する" aria-haspopup="menu" aria-expanded="false" aria-controls="siteLanguageMenu">🌐 言語</button>
+      <div class="site-language-menu" id="siteLanguageMenu" role="menu" hidden>
+        <button type="button" role="menuitemradio" aria-checked="true" data-language="ja"><span>日本語</span><b aria-hidden="true">✓</b></button>
+        <button type="button" role="menuitemradio" aria-checked="false" data-language="en"><span>English</span><b aria-hidden="true">✓</b></button>
+      </div>
+    </div>
+
+    <main class="home-screen">
+      <section class="home-hero" id="homeTop" aria-labelledby="homeTitle">
+        <div class="home-hero-copy">
+          <p class="home-message">Scratchのブロックを、<em>そのままコードへ置き換えるだけ。</em></p>
+          <h1 id="homeTitle">Clambon Playgroundへようこそ</h1>
+          <p class="home-lead">Scratchで知っているブロックを、そのままコードにしてみよう。Clambonなら、<strong>はじめての文字のプログラミング</strong>も安心です。</p>
+          <div class="home-actions">
+            <a class="home-primary-button" href="./playground.html" data-learning-start>学習モードではじめる <span aria-hidden="true">→</span></a>
+            <a class="home-text-link" href="./docs.html">ドキュメントを読む</a>
+          </div>
+        </div>
+        <div class="home-hero-visual">
+          <img class="home-character" src="./assets/clambon-character.png" alt="Clambonのキャラクター" width="1254" height="1254">
+        </div>
+      </section>
+
+      <section class="bridge-feature" aria-labelledby="bridgeFeatureTitle">
+        <div class="bridge-feature-copy">
+          <p class="home-kicker">FROM BLOCKS TO TEXT</p>
+          <h2 id="bridgeFeatureTitle">Scratchからテキスト言語へ渡るための、<em>中間言語。</em></h2>
+          <p>Scratchに近いことばや形のまま、キーボードでコードを書いて、すぐに動かせます。<strong class="bridge-reassurance">遊びながら、自然にプログラミングの力が身につきます。</strong></p>
+        </div>
+        <ol class="bridge-steps" aria-label="Scratchからテキスト言語へ進む流れ">
+          <li><span>01</span><div><strong>Scratchで考える</strong><p>いつものブロックの考え方からスタート。</p></div></li>
+          <li><span>02</span><div><strong>Clambonで書いてみる</strong><p>近いことばを使って、コードを動かしてみよう。</p></div></li>
+          <li><span>03</span><div><strong>次の言語へステップアップ</strong><p>読む・書く・直す力が、少しずつ身につきます。</p></div></li>
+        </ol>
+      </section>
+
+      <section class="scratch-feature" aria-labelledby="scratchFeatureTitle">
+        <div>
+          <p class="home-kicker">ONE BLOCK, ONE CODE</p>
+          <h2 id="scratchFeatureTitle">ScratchをそのままClambonへ。</h2>
+        </div>
+        <p>むずかしいルールを、はじめから覚えなくても大丈夫。Scratchのブロックを見ながら、同じ意味のコードを書けます。</p>
+        <div class="scratch-pair" aria-label="ScratchブロックとClambonコードの1対1対応例">
+          <div class="scratch-block">
+            <span>Scratch</span>
+            <img class="scratch-example-image" src="./assets/scratch-if-score.png" alt="もしscoreが85なら、を表すScratchブロック" width="1646" height="956">
+          </div>
+          <div class="pair-connector"><span aria-hidden="true">→</span><strong>書きうつすだけでOK！</strong></div>
+          <div class="clambon-code"><span>Clambon</span><pre><code>もし &lt;score == 85&gt; {
+
+}</code></pre></div>
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="featuresTitle">
+        <div class="home-section-heading"><p class="home-kicker">WHAT YOU CAN DO</p><h2 id="featuresTitle">Clambonでできること</h2></div>
+        <div class="home-card-grid home-feature-grid">
+          <article class="home-info-card featured"><span aria-hidden="true">↔</span><h3>ブロックと同じ</h3><p>Scratchを見ながら、そのままコードにできます。</p></article>
+          <article class="home-info-card"><span aria-hidden="true">▶</span><h3>すぐ動く</h3><p>書いたらボタンを押すだけ。結果もすぐ見られます。</p></article>
+          <article class="home-info-card"><span aria-hidden="true">★</span><h3>もっと作れる</h3><p>ゲームや日本語など、できることを増やせます。</p></article>
+        </div>
+      </section>
+
+      <section class="home-section home-docs" id="homeDocs" aria-labelledby="quickDocsTitle">
+        <div class="home-section-heading"><p class="home-kicker">QUICK DOCUMENTS</p><h2 id="quickDocsTitle">Playgroundの使い方</h2><p>最初のプログラムは、たった3ステップ。間違えても何度でも試せます。</p></div>
+        <div class="home-docs-layout">
+          <ol class="home-steps">
+            <li><span>ステップ1</span><div><h3>コードを書く</h3><p>左のらんに、コードを書いてみよう。</p></div></li>
+            <li><span>ステップ2</span><div><h3>動かす</h3><p>右上の ▶ ボタンを押してみよう。</p></div></li>
+            <li><span>ステップ3</span><div><h3>結果を見る</h3><p>うまくいかなくても大丈夫。直して何度でもためせます。</p></div></li>
+          </ol>
+          <div class="home-code-sample"><div class="code-window-title">hello.clam</div><pre><code>print("Hello, Clambon!")</code></pre><p>より詳しい文法やScratch対応表は、ドキュメントで確認できます。</p><a href="./docs.html">詳しいドキュメントへ →</a></div>
+        </div>
+      </section>
+
+      <section class="home-section home-extensions" aria-labelledby="extensionsTitle">
+        <div class="home-section-heading"><p class="home-kicker">OFFICIAL EXTENSIONS</p><h2 id="extensionsTitle">公式拡張機能</h2><p>やりたいことに合わせてClambonを育てよう。</p></div>
+        <div class="home-card-grid home-extension-grid">
+          <article class="home-extension-card"><a class="extension-github-link" href="https://github.com/shirayuki03/clage" target="_blank" rel="noopener noreferrer" aria-label="ClageのGitHubを開く"><b class="mark">C</b><div class="extension-name"><small class="extension-reading">クラゲ</small><h3>Clage</h3></div></a><small>GAME</small><p>キャラクターを動かして、遊べるゲームを作れます。</p><code>import Clage</code><a href="./playground.html" data-learning-start>Playgroundで試す →</a></article>
+          <article class="home-extension-card japa"><a class="extension-github-link" href="https://github.com/shirayuki03/JapaCla" target="_blank" rel="noopener noreferrer" aria-label="JapaClaのGitHubを開く"><b class="mark">日</b><div class="extension-name"><small class="extension-reading">ジャパクラ</small><h3>JapaCla</h3></div></a><small>JAPANESE</small><p>Clambonのコードを、日本語で書けます。</p><code>import JapaCla</code><a href="./playground.html" data-learning-start>Playgroundで試す →</a></article>
+          <article class="home-extension-card kata"><a class="extension-github-link" href="https://github.com/shirayuki03/KataCla" target="_blank" rel="noopener noreferrer" aria-label="KataClaのGitHubを開く"><b class="mark">カ</b><div class="extension-name"><small class="extension-reading">カタクラ</small><h3>KataCla</h3></div></a><small>KATAKANA</small><p>Clambonのコードを、カタカナで書けます。</p><code>import KataCla</code><a href="./playground.html" data-learning-start>Playgroundで試す →</a></article>
+        </div>
+      </section>
+
+      <section class="home-final-cta"><p class="home-kicker">READY?</p><h2>だいじょうぶ。Scratchで知っていることから始めよう。</h2><p>ブロックの見本を見ながら、自分のペースで何度でもためせます。</p><a class="home-primary-button light" href="./playground.html" data-learning-start>学習モードではじめる →</a></section>
+    </main>
+    <script src="./home.js"></script>
+  </body>
+</html>

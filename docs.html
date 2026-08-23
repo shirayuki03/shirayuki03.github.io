@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ドキュメント | Clambon</title>
+    <meta name="description" content="Clambonの始め方、基本文法、Scratchとの1対1対応、公式拡張機能を説明するドキュメント。">
+    <link rel="icon" type="image/png" href="./assets/clambon-icon.png">
+    <link rel="stylesheet" href="./home.css">
+    <link rel="stylesheet" href="./docs.css">
+  </head>
+  <body class="docs-page">
+    <nav class="site-menu" id="siteMenu" aria-label="サイトメニュー">
+      <button class="site-menu-button" id="siteMenuButton" type="button" aria-expanded="false" aria-controls="siteMenuPanel" aria-label="メニューを開く"><span></span><span></span><span></span></button>
+      <div class="site-menu-panel" id="siteMenuPanel" hidden><a href="./index.html">トップ</a><a href="#docsTop">ドキュメント</a></div>
+    </nav>
+
+    <header class="docs-header" id="docsTop">
+      <a class="docs-brand" href="./index.html"><img src="./assets/clambon-icon.png" alt=""><span>Clambon</span></a>
+      <div class="docs-header-actions">
+        <div class="site-language-picker" id="siteLanguagePicker">
+          <button class="site-language-button" id="siteLanguageButton" type="button" aria-label="表示言語を選択する" aria-haspopup="menu" aria-expanded="false" aria-controls="siteLanguageMenu">🌐 言語</button>
+          <div class="site-language-menu" id="siteLanguageMenu" role="menu" hidden>
+            <button type="button" role="menuitemradio" aria-checked="true" data-language="ja"><span>日本語</span><b aria-hidden="true">✓</b></button>
+            <button type="button" role="menuitemradio" aria-checked="false" data-language="en"><span>English</span><b aria-hidden="true">✓</b></button>
+          </div>
+        </div>
+        <a class="docs-play-button" href="./playground.html" data-learning-start>Playgroundを開く →</a>
+      </div>
+    </header>
+
+    <div class="docs-layout">
+      <aside class="docs-sidebar" aria-label="ドキュメント目次">
+        <p>CONTENTS</p>
+        <a href="#introduction">Clambonとは</a>
+        <a href="#getting-started">はじめ方</a>
+        <a href="#scratch-mapping">Scratchとの対応</a>
+        <a href="#syntax">基本文法</a>
+        <a href="#extensions">拡張機能</a>
+      </aside>
+
+      <main class="docs-content">
+        <section class="docs-intro" id="introduction">
+          <p class="home-kicker">CLAMBON DOCUMENTS</p>
+          <h1>Scratchからコードへ進むための、Clambon入門。</h1>
+          <p>ClambonはScratchのブロックと1対1対応するコードを記述できるプログラミング言語です。このページでは、Playgroundの使い方と最初に覚える文法を説明します。</p>
+        </section>
+
+        <section id="getting-started">
+          <h2>はじめ方</h2>
+          <ol class="docs-numbered-list">
+            <li><b>Playgroundを開く</b><span>ホームの「学習モードではじめる」を押します。</span></li>
+            <li><b>コードを書く</b><span>左側のエディタへプログラムを入力します。</span></li>
+            <li><b>実行する</b><span>右上の ▶ を押し、出力欄で結果を確認します。</span></li>
+          </ol>
+          <div class="docs-code"><span>最初のプログラム</span><pre><code>print("Hello, Clambon!")</code></pre></div>
+        </section>
+
+        <section id="scratch-mapping">
+          <p class="home-kicker">ONE BLOCK, ONE CODE</p>
+          <h2>Scratchとの1対1対応</h2>
+          <p>1つのScratchブロックに対して、同じ役割を持つClambonの書き方があります。学習パレットの「ブロック対応表」では、対応元の画像とコードを並べて確認できます。</p>
+          <div class="mapping-table" role="table" aria-label="ScratchとClambonの対応例">
+            <div class="mapping-head" role="row"><b>Scratch</b><b>Clambon</b></div>
+            <div role="row"><span>「Hello!」と言う</span><code>print("Hello!")</code></div>
+            <div role="row"><span>1から10までの乱数</span><code>random(1 to 10)</code></div>
+            <div role="row"><span>1秒待つ</span><code>wait(1)</code></div>
+          </div>
+          <p class="docs-note">正確な対応一覧はPlayground内の「学習」→「ブロック対応表」を参照してください。</p>
+        </section>
+
+        <section id="syntax">
+          <h2>基本文法</h2>
+          <div class="docs-topic-grid">
+            <article><h3>出力</h3><p>値や計算結果を出力欄へ表示します。</p><code>print(2 + 3)</code></article>
+            <article><h3>関数</h3><p>処理をまとめ、名前を付けて再利用します。</p><pre><code>define plus(a, b) {
+  return a + b
+}</code></pre></article>
+            <article><h3>拡張機能</h3><p>プログラムの先頭で使う拡張機能を読み込みます。</p><code>import Clage</code></article>
+          </div>
+        </section>
+
+        <section id="extensions">
+          <h2>公式拡張機能</h2>
+          <div class="docs-extension-list">
+            <article><a href="https://github.com/shirayuki03/clage" target="_blank" rel="noopener noreferrer"><span class="docs-extension-mark">C</span><b>Clage</b></a><p>Canvasゲーム、スプライト、キーボード、コスチュームを追加します。</p></article>
+            <article><a href="https://github.com/shirayuki03/JapaCla" target="_blank" rel="noopener noreferrer"><span class="docs-extension-mark japa">日</span><b>JapaCla</b></a><p>Clambonの予約語を日本語で記述できるようにします。</p></article>
+            <article><a href="https://github.com/shirayuki03/KataCla" target="_blank" rel="noopener noreferrer"><span class="docs-extension-mark kata">カ</span><b>KataCla</b></a><p>Clambonの予約語をカタカナで記述できるようにします。</p></article>
+          </div>
+        </section>
+
+        <section class="docs-next"><h2>実際に書いてみよう</h2><p>学習パレットとブロック対応表を開いた状態で始められます。</p><a class="home-primary-button" href="./playground.html" data-learning-start>学習モードではじめる →</a></section>
+      </main>
+    </div>
+    <script src="./home.js"></script>
+  </body>
+</html>
