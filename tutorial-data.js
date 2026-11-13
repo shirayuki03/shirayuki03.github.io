@@ -61,7 +61,7 @@ window.ClambonTutorialData = (() => {
     ["delete", "リスト", "items.delete(1)", "要素を削除する", scratch, "変数", "itemsの1番目を削除する", "番号を指定して要素を削除します。", scratchDocs],
     ["delete-all", "リスト", "items.delete(all)", "全要素を削除する", scratch, "変数", "itemsのすべてを削除する", "リストを空にします。", scratchDocs],
     ["insert", "リスト", "items.insert(\"A\" at 1)", "位置を指定して挿入する", scratch, "変数", "Aをitemsの1番目に挿入する", "値と挿入位置を指定します。", scratchDocs],
-    ["item", "リスト", "items.item(1)", "指定位置の要素を得る", scratch, "変数", "itemsの1番目", "どちらもリスト番号は1から始まります。", scratchDocs],
+    ["item", "リスト", "items[1]", "指定位置の要素を得る", scratch, "変数", "itemsの1番目", "どちらもリスト番号は1から始まります。", scratchDocs],
     ["list-length", "リスト", "items.length", "リストの長さを得る", scratch, "変数", "itemsの長さ", "要素数を数値として返します。", scratchDocs],
     ["print", "入出力", "print(\"Hello\")", "出力欄へ表示する", extension, "Consoles", "log", "Clambonは画面の出力欄、TurboWarpは開発者コンソールへ表示します。", "https://extensions.turbowarp.org/"],
     ["define", "関数", "define plus(a, b) { return a + b }", "関数を定義する", scratch, "ブロック定義", "plus a b を定義", "引数を持つ再利用可能な処理を作ります。", scratchDocs],

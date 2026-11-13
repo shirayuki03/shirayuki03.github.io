@@ -47,7 +47,6 @@ const referenceView = document.querySelector("#referenceView");
 const tutorialProgress = document.querySelector("#tutorialProgress");
 const outputLineLimit = 1000;
 const extensionStorageKey = "clambon.web.extensions.v1";
-const tutorialStorageKey = "clambon.web.tutorial.v1";
 const learningModeStorageKey = "clambon.web.learning-mode.v1";
 const settingsStorageKey = "clambon.web.settings.v1";
 const projectFormat = "clambon-project";
@@ -114,6 +113,7 @@ let extensionRuntimes = [];
 let currentEditMode = "code";
 let inputSyncTimer = null;
 let currentRunOutput = [];
+let currentLessonContext = null;
 let tutorialState = loadTutorialState();
 let learningModeEnabled = localStorage.getItem(learningModeStorageKey) === "true";
 let projectFileBusy = false;
@@ -313,6 +313,11 @@ function appendOutput(text) {
 function handleWorkerMessage(event) {
   const { type, status, text, state, message, extensionName, eventType, payload } = event.data || {};
 
+  if (type === "lessonResult") {
+    window.ClambonLearning.receive(event.data.result, event.data.context);
+    return;
+  }
+
   if (type === "ready") {
     engineReady = true;
     engineStarting = false;
@@ -332,6 +337,7 @@ function handleWorkerMessage(event) {
   }
 
   if (type === "output") {
+    if (currentRunOutput.length === 0) outputLog.textContent = "";
     currentRunOutput.push(...String(text).split("\n"));
     appendOutput(text);
     return;
@@ -343,6 +349,7 @@ function handleWorkerMessage(event) {
   }
 
   if (type === "error") {
+    window.ClambonLearning.error();
     appendOutput(message || (playgroundSettings.language === "en" ? "An error occurred while running the program." : "実行中にエラーが起きました。"));
     setStatus("エラー", "idle");
     showLessonFeedback(false, extensionLessonFeedback() || (playgroundSettings.language === "en" ? "Fix the runtime error, then try again." : "実行エラーを直してから、もう一度試してみましょう。"));
@@ -356,10 +363,10 @@ function handleWorkerMessage(event) {
 
   if (type === "status") {
     if (status === "loading") setStatus("準備中", "running");
-    if (status === "running") setStatus("実行中", "running");
+    if (status === "running") { setStatus("実行中", "running"); window.ClambonLearning.running(); }
     if (status === "completed") {
       setStatus("完了", "saved");
-      evaluateCurrentLesson();
+      window.ClambonLearning.settled();
     }
     if (status === "stopped") setStatus("停止", "idle");
     if (status === "error") setStatus("エラー", "idle");
@@ -394,13 +401,16 @@ function postRun(code) {
   engineWorker.postMessage({
     type: "run",
     code,
-    restoreState: latestCheckpoint,
-    extensions: getWorkerExtensions()
+    restoreState: learningModeEnabled ? null : latestCheckpoint,
+    lessonContext: currentLessonContext,
+    extensions: learningModeEnabled ? [] : getWorkerExtensions()
   });
 }
 
 function runCode() {
+  if (engineReady && runStatus.classList.contains("running")) return;
   const code = editor.value;
+  currentLessonContext = window.ClambonLearning.runContext(code);
   currentRunOutput = [];
   outputLog.textContent = msg("starting");
   if (!engineWorker) {
@@ -416,18 +426,8 @@ function runCode() {
   postRun(code);
 }
 
-function loadTutorialState() {
-  const fallback = { lessonId: "output", completed: [], passed: false };
-  try {
-    return { ...fallback, ...JSON.parse(localStorage.getItem(tutorialStorageKey) || "{}") };
-  } catch (_error) {
-    return fallback;
-  }
-}
-
-function saveTutorialState() {
-  localStorage.setItem(tutorialStorageKey, JSON.stringify(tutorialState));
-}
+function loadTutorialState() { return window.ClambonLearning.loadState(); }
+function saveTutorialState() { window.ClambonLearning.save(); }
 
 function escapeHtml(value) {
   return String(value)
@@ -480,6 +480,7 @@ function restoreTutorialPaneHome() {
 }
 
 function setLearningMode(enabled, persist = true) {
+  window.ClambonLearning.changeMode(enabled);
   if (!enabled) restoreTutorialPaneHome();
   learningModeEnabled = enabled;
   splitWorkbench.classList.toggle("learning-mode-off", !enabled);
@@ -491,33 +492,7 @@ function setLearningMode(enabled, persist = true) {
   if (persist) localStorage.setItem(learningModeStorageKey, String(enabled));
 }
 
-function renderLessons() {
-  const lesson = getCurrentLesson();
-  const mapping = getMapping(lesson.mappingId);
-  const completed = new Set(tutorialState.completed);
-  const currentIndex = tutorialData.lessons.findIndex((item) => item.id === lesson.id);
-  lessonView.innerHTML = `
-    <div class="lesson-picker" aria-label="${msg("lessons")}">
-      ${tutorialData.lessons.map((rawItem, index) => { const item = localizeRecord(rawItem); return `<button type="button" class="lesson-chip ${item.id === lesson.id ? "active" : ""} ${completed.has(item.id) ? "done" : ""}" data-lesson-id="${item.id}"><span>${completed.has(item.id) ? "✓" : index + 1}</span>${escapeHtml(item.title)}</button>`; }).join("")}
-    </div>
-    <article class="lesson-card">
-      <div class="lesson-step"><span>STEP 1</span><strong>${msg("compare")}</strong></div>
-      <h3>${escapeHtml(lesson.title)}</h3>
-      <div class="comparison-grid">
-        <div><span class="comparison-label">Clambon</span><pre><code>${escapeHtml(lesson.sample)}</code></pre><button type="button" class="copy-code" data-copy-code="${escapeHtml(lesson.sample)}">${msg("copy")}</button></div>
-        <div><span class="platform-badge platform-${escapeHtml(mapping.platform)}">${escapeHtml(mapping.platform)}</span>${blockPreview(mapping)}</div>
-      </div>
-      <p class="comparison-note">${escapeHtml(mapping.comparison)}</p>
-      <div class="lesson-step exercise-step"><span>STEP 2</span><strong>${msg("exercise")}</strong></div>
-      <p class="lesson-task">${escapeHtml(lesson.task)}</p>
-      <p class="lesson-hint"><strong>${msg("hint")}</strong>${escapeHtml(lesson.hint)}</p>
-      ${lesson.requiredExtension ? `<div class="lesson-extension-action"><div><strong>${escapeHtml(lesson.requiredExtension)}</strong><span>${isLessonExtensionLoaded(lesson) ? (playgroundSettings.language === "en" ? "Loaded" : "追加済み") : (playgroundSettings.language === "en" ? "Not loaded yet" : "まだ追加されていません")}</span></div><button type="button" id="addLessonExtensionButton" ${isLessonExtensionLoaded(lesson) ? "disabled" : ""}>${isLessonExtensionLoaded(lesson) ? (playgroundSettings.language === "en" ? "Added" : "追加済み") : (playgroundSettings.language === "en" ? `Add ${escapeHtml(lesson.requiredExtension)}` : `${escapeHtml(lesson.requiredExtension)}を追加`)}</button></div>` : ""}
-      <div class="lesson-feedback ${tutorialState.passed ? "success" : ""}" id="lessonFeedback" role="status">${tutorialState.passed ? msg("lessonReady") : msg("lessonWaiting")}</div>
-      ${tutorialState.passed ? `<button type="button" class="next-lesson" id="nextLessonButton">${currentIndex === tutorialData.lessons.length - 1 ? msg("first") : msg("next")}</button>` : ""}
-    </article>
-    <button type="button" class="reset-progress" id="resetTutorialButton">${msg("resetProgress")}</button>`;
-  updateTutorialProgress();
-}
+function renderLessons() { window.ClambonLearning.render(); }
 
 function renderReference() {
   const categories = [...new Set(tutorialData.mappings.map((item) => localizeRecord(item).category))];
@@ -562,45 +537,12 @@ function setTutorialTab(name) {
   referenceTab.setAttribute("aria-selected", String(!lessonsActive));
 }
 
-function updateTutorialProgress() {
-  const percent = Math.round((tutorialState.completed.length / tutorialData.lessons.length) * 100);
-  tutorialProgress.textContent = `${percent}%`;
-}
 
 function showLessonFeedback(success, message) {
   const feedback = document.querySelector("#lessonFeedback");
   if (!feedback) return;
   feedback.className = `lesson-feedback ${success ? "success" : "error"}`;
   feedback.textContent = message;
-}
-
-function evaluateCurrentLesson() {
-  if (!learningModeEnabled || lessonView.hidden) return;
-  const lesson = getCurrentLesson();
-  const extensionMessage = extensionLessonFeedback();
-  if (extensionMessage) {
-    showLessonFeedback(false, extensionMessage);
-    return;
-  }
-  const actual = currentRunOutput.map((line) => line.trim()).filter(Boolean);
-  const expectedMatches = actual.length === lesson.expected.length && lesson.expected.every((line, index) => actual[index] === line);
-  const missingSyntax = lesson.required.some((pattern) => !pattern.test(editor.value));
-  if (!expectedMatches) {
-    showLessonFeedback(false, playgroundSettings.language === "en"
-      ? `Check the output. Expected: ${lesson.expected.join(" / ")}`
-      : `出力を確認しましょう。期待する出力：${lesson.expected.join(" / ")}`);
-    return;
-  }
-  if (missingSyntax) {
-    showLessonFeedback(false, playgroundSettings.language === "en"
-      ? `The output is correct. Now use the syntax requested by the exercise. ${lesson.hint}`
-      : `出力は合っています。課題で指定された構文も使ってみましょう。${lesson.hint}`);
-    return;
-  }
-  if (!tutorialState.completed.includes(lesson.id)) tutorialState.completed.push(lesson.id);
-  tutorialState.passed = true;
-  saveTutorialState();
-  renderLessons();
 }
 
 async function copyLessonCode(code, button) {
@@ -620,6 +562,7 @@ async function copyLessonCode(code, button) {
 }
 
 function stopCode() {
+  window.ClambonLearning.cancel();
   if (engineWorker) {
     engineWorker.terminate();
   }
@@ -644,6 +587,7 @@ function formatCode() {
     .join("\n")
     .trimStart();
   updateEditorPresentation();
+  window.ClambonLearning.onEdit();
 }
 
 function setFileMenuOpen(isOpen) {
@@ -757,8 +701,10 @@ async function loadCodeFromPc(file) {
       }
     }
     document.querySelector("#projectName").value = project.name;
+    if (learningModeEnabled) setLearningMode(false);
     editor.value = project.source;
     updateEditorPresentation();
+    window.ClambonLearning.saveEditor();
     resetRuntimeState();
     setStatus(warnings.length ? "警告あり" : "読み込み済み", warnings.length ? "idle" : "saved");
     outputLog.textContent = warnings.length
@@ -1651,6 +1597,7 @@ function endPaneDrag() {
 }
 
 editor.value = exampleCode;
+window.ClambonLearning.restoreProduction();
 rebuildSyntaxHighlighting();
 updateEditorPresentation();
 setLearningMode(learningModeEnabled, false);
@@ -1659,7 +1606,8 @@ createEngineWorker();
 restoreExtensions();
 
 
-editor.addEventListener("input", updateEditorPresentation);
+editor.addEventListener("input", () => { updateEditorPresentation(); window.ClambonLearning.onEdit(); });
+window.addEventListener("pagehide", () => window.ClambonLearning.saveEditor());
 editor.addEventListener("keydown", handleEditorIndent);
 editor.addEventListener("scroll", () => {
   lineNumbers.scrollTop = editor.scrollTop;
@@ -1720,40 +1668,9 @@ extensionUrlInput.addEventListener("keydown", (event) => {
 });
 lessonTab.addEventListener("click", () => setTutorialTab("lessons"));
 referenceTab.addEventListener("click", () => setTutorialTab("reference"));
-lessonView.addEventListener("click", (event) => {
-  const lessonButton = event.target.closest("[data-lesson-id]");
-  if (lessonButton) {
-    tutorialState.lessonId = lessonButton.dataset.lessonId;
-    tutorialState.passed = tutorialState.completed.includes(tutorialState.lessonId);
-    saveTutorialState();
-    renderLessons();
-    return;
-  }
-  const copyButton = event.target.closest("[data-copy-code]");
-  if (copyButton) {
-    copyLessonCode(copyButton.dataset.copyCode, copyButton);
-    return;
-  }
-  if (event.target.closest("#addLessonExtensionButton")) {
-    const lesson = getCurrentLesson();
-    extensionUrlInput.value = lesson.extensionUrl || "";
-    setExtensionModalOpen(true);
-    return;
-  }
-  if (event.target.closest("#nextLessonButton")) {
-    const currentIndex = tutorialData.lessons.indexOf(getCurrentLesson());
-    tutorialState.lessonId = tutorialData.lessons[(currentIndex + 1) % tutorialData.lessons.length].id;
-    tutorialState.passed = tutorialState.completed.includes(tutorialState.lessonId);
-    saveTutorialState();
-    renderLessons();
-    return;
-  }
-  if (event.target.closest("#resetTutorialButton")) {
-    tutorialState = { lessonId: "output", completed: [], passed: false };
-    saveTutorialState();
-    renderLessons();
-  }
-});
+lessonView.addEventListener("click", window.ClambonLearning.click);
+lessonView.addEventListener("change", window.ClambonLearning.checklist);
+
 referenceView.addEventListener("input", filterReference);
 referenceView.addEventListener("change", filterReference);
 document.addEventListener("error", (event) => {

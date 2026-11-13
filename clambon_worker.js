@@ -67,12 +67,13 @@ async function initialize() {
     const micropip = pyodide.pyimport("micropip");
     await micropip.install("lark");
 
-    const [grammarText, runtimeText] = await Promise.all([
+    const [grammarText, runtimeText, validationText] = await Promise.all([
       readText("./grammar.lark"),
-      readText("./clambon_runtime.py")
+      readText("./clambon_runtime.py"),
+      readText("./lesson_validation.py")
     ]);
 
-    pyodide.runPython(runtimeText);
+    pyodide.runPython(runtimeText + "\n" + validationText);
     pyodide.globals.get("set_handlers")(
       queueOutput,
       (state) => post("checkpoint", { state: String(state) }),
@@ -103,18 +104,27 @@ async function initialize() {
   }
 }
 
-async function runSource(code, restoreState) {
+async function runSource(code, restoreState, lessonContext) {
   await initialize();
   configureExtensionsProxy(pyodide.toPy(configuredExtensions));
   post("status", { status: "running" });
   pyodide.globals.set("__run_code_source", String(code || ""));
   pyodide.globals.set("__run_restore_state", restoreState || null);
+  if (lessonContext) resetStateProxy();
   const result = pyToJs(await pyodide.runPythonAsync("await run_code_async(__run_code_source, __run_restore_state)"));
   flushOutput();
   if (result && result.checkpoint) {
     post("checkpoint", { state: result.checkpoint });
   }
   if (result && result.ok) {
+    if (lessonContext) {
+      let assessment = {ok: true};
+      if (lessonContext.assessment) {
+        pyodide.globals.set("__lesson_spec_json", JSON.stringify(lessonContext.assessment));
+        assessment = pyToJs(pyodide.runPython("assess_lesson(__run_code_source, json.loads(__lesson_spec_json))"));
+      }
+      post("lessonResult", {result: assessment, context: lessonContext});
+    }
     post("status", { status: "completed" });
     return;
   }
@@ -123,7 +133,7 @@ async function runSource(code, restoreState) {
 }
 
 self.addEventListener("message", (event) => {
-  const { type, code, restoreState, state, extensions, input } = event.data || {};
+  const { type, code, restoreState, state, extensions, input, lessonContext } = event.data || {};
 
   (async () => {
     if (type === "init") {
@@ -133,7 +143,7 @@ self.addEventListener("message", (event) => {
 
     if (type === "run") {
       configuredExtensions = Array.isArray(extensions) ? extensions : configuredExtensions;
-      await runSource(String(code || ""), restoreState || null);
+      await runSource(String(code || ""), restoreState || null, lessonContext);
       return;
     }
 
